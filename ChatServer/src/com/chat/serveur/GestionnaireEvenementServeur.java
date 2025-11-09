@@ -5,29 +5,30 @@ import com.commun.evenement.GestionnaireEvenement;
 import com.commun.net.Connexion;
 
 /**
- * Cette classe représente un gestionnaire d'événement d'un serveur. Lorsqu'un serveur reçoit un texte d'un client,
- * il crée un événement à partir du texte reçu et alerte ce gestionnaire qui réagit en gérant l'événement.
+ * Cette classe reprï¿½sente un gestionnaire d'ï¿½vï¿½nement d'un serveur. Lorsqu'un serveur reï¿½oit un texte d'un client,
+ * il crï¿½e un ï¿½vï¿½nement ï¿½ partir du texte reï¿½u et alerte ce gestionnaire qui rï¿½agit en gï¿½rant l'ï¿½vï¿½nement.
  *
- * @author Abdelmoumène Toudeft (Abdelmoumene.Toudeft@etsmtl.ca)
+ * @author Abdelmoumï¿½ne Toudeft (Abdelmoumene.Toudeft@etsmtl.ca)
  * @version 1.0
  * @since 2023-09-01
  */
 public class GestionnaireEvenementServeur implements GestionnaireEvenement {
     private Serveur serveur;
 
+
     /**
-     * Construit un gestionnaire d'événements pour un serveur.
+     * Construit un gestionnaire d'ï¿½vï¿½nements pour un serveur.
      *
-     * @param serveur Serveur Le serveur pour lequel ce gestionnaire gère des événements
+     * @param serveur Serveur Le serveur pour lequel ce gestionnaire gï¿½re des ï¿½vï¿½nements
      */
     public GestionnaireEvenementServeur(Serveur serveur) {
         this.serveur = serveur;
     }
 
     /**
-     * Méthode de gestion d'événements. Cette méthode contiendra le code qui gère les réponses obtenues d'un client.
+     * Mï¿½thode de gestion d'ï¿½vï¿½nements. Cette mï¿½thode contiendra le code qui gï¿½re les rï¿½ponses obtenues d'un client.
      *
-     * @param evenement L'événement à gérer.
+     * @param evenement L'ï¿½vï¿½nement ï¿½ gï¿½rer.
      */
     @Override
     public void traiter(Evenement evenement) {
@@ -41,16 +42,43 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
             System.out.println("SERVEUR-Recu : " + evenement.getType() + " " + evenement.getArgument());
             typeEvenement = evenement.getType();
             switch (typeEvenement) {
-                case "EXIT": //Ferme la connexion avec le client qui a envoyé "EXIT":
+                case "EXIT": //Ferme la connexion avec le client qui a envoyï¿½ "EXIT":
                     cnx.envoyer("END");
                     serveur.enlever(cnx);
                     cnx.close();
                     break;
-                case "LIST": //Envoie la liste des alias des personnes connectées :
+                case "LIST": //Envoie la liste des alias des personnes connectï¿½es :
                     cnx.envoyer("LIST " + serveur.list());
                     break;
+                case "MSG":
+                    String alias = cnx.getAlias();
+                    String message = evenement.getArgument();
+                    serveur.envoyerATousSauf(message, alias);
+                    serveur.ajouterHistorique(message, alias);
+                    break;
+                case "JOIN":
+                    serveur.invite(evenement.getArgument(),cnx.getAlias());
+                    break;
+                case "DECLINE":
+                    serveur.decline(cnx.getAlias(), evenement.getArgument());
+                    break;
+                case "INV":
+                    cnx.envoyer("INV " +serveur.inv(cnx.getAlias()));
+                    break;
+                case "PRV":
+                    String[] prvArgs = evenement.getArgument().split(" ");
+                    String invite = prvArgs[0];
+                    String mes= "";
+                    for(int i = 1; i < prvArgs.length; i++){
+                        mes += prvArgs[i] +" ";
+                    }
+                    serveur.prv(cnx.getAlias(), invite, mes);
+                    break;
+                case "QUIT":
+                    serveur.quit(cnx.getAlias(),  evenement.getArgument());
+                    break;
 
-                //Ajoutez ici d’autres case pour gérer d’autres commandes.
+                    //Ajoutez ici dï¿½autres case pour gï¿½rer dï¿½autres commandes.
 
                 default: //Renvoyer le texte recu convertit en majuscules :
                     msg = (evenement.getType() + " " + evenement.getArgument()).toUpperCase();

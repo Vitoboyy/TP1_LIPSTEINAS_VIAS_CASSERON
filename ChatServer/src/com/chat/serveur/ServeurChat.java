@@ -1,21 +1,27 @@
 package com.chat.serveur;
 
 import com.commun.net.Connexion;
+import  java.util.Iterator;
+import java.util.Vector;
 
 /**
- * Cette classe étend (hérite) la classe abstraite Serveur et y ajoute le nécessaire pour que le
+ * Cette classe ï¿½tend (hï¿½rite) la classe abstraite Serveur et y ajoute le nï¿½cessaire pour que le
  * serveur soit un serveur de chat.
  *
- * @author Abdelmoumène Toudeft (Abdelmoumene.Toudeft@etsmtl.ca)
+ * @author Abdelmoumï¿½ne Toudeft (Abdelmoumene.Toudeft@etsmtl.ca)
  * @version 1.0
  * @since 2023-09-15
  */
 public class ServeurChat extends Serveur {
 
+    private Vector<String> historique = new Vector<>();
+    private Vector<Invitation> invit = new Vector<>();
+    private Vector<SalonPrive> prives = new Vector<>();
+
     /**
-     * Crée un serveur de chat qui va écouter sur le port spécifié.
+     * Crï¿½e un serveur de chat qui va ï¿½couter sur le port spï¿½cifiï¿½.
      *
-     * @param port int Port d'écoute du serveur
+     * @param port int Port d'ï¿½coute du serveur
      */
     public ServeurChat(int port) {
         super(port);
@@ -33,12 +39,12 @@ public class ServeurChat extends Serveur {
         return super.ajouter(connexion);
     }
     /**
-     * Valide l'arrivée d'un nouveau client sur le serveur. Cette redéfinition
-     * de la méthode héritée de Serveur vérifie si le nouveau client a envoyé
-     * un alias composé uniquement des caractères a-z, A-Z, 0-9, - et _.
+     * Valide l'arrivï¿½e d'un nouveau client sur le serveur. Cette redï¿½finition
+     * de la mï¿½thode hï¿½ritï¿½e de Serveur vï¿½rifie si le nouveau client a envoyï¿½
+     * un alias composï¿½ uniquement des caractï¿½res a-z, A-Z, 0-9, - et _.
      *
-     * @param connexion Connexion la connexion représentant le client
-     * @return boolean true, si le client a validé correctement son arrivée, false, sinon
+     * @param connexion Connexion la connexion reprï¿½sentant le client
+     * @return boolean true, si le client a validï¿½ correctement son arrivï¿½e, false, sinon
      */
     @Override
     protected boolean validerConnexion(Connexion connexion) {
@@ -62,7 +68,7 @@ public class ServeurChat extends Serveur {
         if (!res)
             return false;
         for (Connexion cnx:connectes) {
-            if (aliasFourni.equalsIgnoreCase(cnx.getAlias())) { //alias déjà utilisé
+            if (aliasFourni.equalsIgnoreCase(cnx.getAlias())) { //alias dï¿½jï¿½ utilisï¿½
                 res = false;
                 break;
             }
@@ -74,9 +80,9 @@ public class ServeurChat extends Serveur {
     }
 
     /**
-     * Retourne la liste des alias des connectés au serveur dans une chaîne de caractères.
+     * Retourne la liste des alias des connectï¿½s au serveur dans une chaï¿½ne de caractï¿½res.
      *
-     * @return String chaîne de caractères contenant la liste des alias des membres connectés sous la
+     * @return String chaï¿½ne de caractï¿½res contenant la liste des alias des membres connectï¿½s sous la
      * forme alias1:alias2:alias3 ...
      */
     public String list() {
@@ -86,14 +92,145 @@ public class ServeurChat extends Serveur {
         return s;
     }
     /**
-     * Retourne la liste des messages de l'historique de chat dans une chaîne
-     * de caractères.
+     * Retourne la liste des messages de l'historique de chat dans une chaï¿½ne
+     * de caractï¿½res.
      *
-     * @return String chaîne de caractères contenant la liste des alias des membres connectés sous la
+     * @return String chaï¿½ne de caractï¿½res contenant la liste des alias des membres connectï¿½s sous la
      * forme message1\nmessage2\nmessage3 ...
      */
     public String historique() {
         String s = "";
+        for (String hist:historique) {
+            s+=hist+"\n";
+        }
         return s;
+    }
+
+    public void envoyerATousSauf(String str, String aliasExpediteur){
+        String msg = aliasExpediteur +" >> "+str;
+        for (Connexion cnx:connectes){
+            if (!cnx.getAlias().equals(aliasExpediteur)){
+                cnx.envoyer(msg);
+            }
+        }
+    }
+
+    public void ajouterHistorique(String msg, String aliasExp){
+        String s = aliasExp+" >> "+msg;
+        historique.add(s);
+    }
+
+    public void invite(String aliasInvite, String aliasHost){
+        Iterator<Invitation> iterator = invit.iterator();
+        boolean invitationTrouvee = false;
+
+        while (iterator.hasNext()) {
+            Invitation inv = iterator.next();
+
+            if (inv.aliasInvite.equals(aliasHost) && inv.aliasHost.equals(aliasInvite)) {
+                prives.add(new SalonPrive(aliasInvite, aliasHost));
+                iterator.remove();
+                invitationTrouvee = true;
+                break;
+            }
+        }
+
+        if (invitationTrouvee) {
+            for(Connexion cnx:connectes){
+                if(cnx.getAlias().equals(aliasInvite)){
+                    cnx.envoyer("JOINOK "+aliasHost);
+                }
+            }
+            for(Connexion cnx:connectes){
+                if(cnx.getAlias().equals(aliasHost)){
+                    cnx.envoyer("JOINOK "+aliasInvite);
+                }
+            }
+            return;
+        }
+
+        Invitation temp = new Invitation(aliasInvite, aliasHost);
+        invit.add(temp);
+
+        for(Connexion cnx:connectes){
+            if(cnx.getAlias().equals(aliasInvite)){
+                cnx.envoyer("JOIN "+aliasHost);
+            }
+        }
+    }
+
+    public void decline(String aliasInvite, String aliasHost){
+        Iterator<Invitation> iterator = invit.iterator();
+
+        while (iterator.hasNext()) {
+            Invitation inv = iterator.next();
+
+            if ((inv.aliasInvite.equals(aliasInvite) && inv.aliasHost.equals(aliasHost))||(inv.aliasInvite.equals(aliasHost) && inv.aliasHost.equals(aliasInvite))) {
+                invit.remove(inv);
+                iterator.remove();
+
+
+                for(Connexion cnx:connectes){
+                    if(cnx.getAlias().equals(aliasHost)){
+                        cnx.envoyer("DECLINE "+ aliasInvite);
+                        return;
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    public String inv(String aliasInvite){
+
+        Iterator<Invitation> iterator = invit.iterator();
+        String s = "";
+        while (iterator.hasNext()) {
+            Invitation inv = iterator.next();
+
+            if (inv.aliasInvite.equals(aliasInvite)){
+                    s+=inv.aliasHost+":";
+            }
+        }
+        return s;
+    }
+
+    public void prv(String aliasHost, String aliasInvite, String msg){
+        SalonPrive temp = new SalonPrive(aliasInvite, aliasHost);
+        Iterator<SalonPrive> iterator = prives.iterator();
+
+        while (iterator.hasNext()) {
+            SalonPrive prive1 = iterator.next();
+
+            if(prive1.equals(temp)){
+                String s = aliasHost+" (>>) "+msg;
+                for (Connexion cnx:connectes){
+                    if(cnx.getAlias().equals(aliasInvite)){
+                        cnx.envoyer(s);
+                        return;
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    public void quit(String aliasHost, String aliasInvite){
+        SalonPrive temp = new SalonPrive(aliasInvite, aliasHost);
+        Iterator<SalonPrive> iterator = prives.iterator();
+
+        while (iterator.hasNext()) {
+            SalonPrive prive = iterator.next();
+            if(prive.equals(temp)){
+                prives.remove(prive);
+                for(Connexion cnx:connectes){
+                    if(cnx.getAlias().equals(aliasInvite)){
+                        cnx.envoyer("QUIT "+aliasHost);
+                        return;
+                    }
+                }
+                break;
+            }
+        }
     }
 }
