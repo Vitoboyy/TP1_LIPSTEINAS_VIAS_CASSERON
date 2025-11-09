@@ -2,6 +2,8 @@ package com.atoudeft.tictactoe.classes;
 
 import com.atoudeft.tictactoe.MethodeNonImplementeeException;
 
+import java.util.Collections;
+
 public final class Partie {
     private final Plateau plateau = new Plateau();
     private Symbole joueurCourant;
@@ -26,9 +28,14 @@ public final class Partie {
     }
 
     public boolean jouer(Symbole symbole, Position position) {
-        throw new MethodeNonImplementeeException("***** Vous n'avez pas encore implemente la methode : "
-                +Thread.currentThread().getStackTrace()[1].getMethodName()
-                +"() de la classe "+this.getClass().getName());
+        if(!plateau.estVide(position)) return false;
+        if(!isPartieEnCours()) return false;
+        if(!symbole.equals(this.joueurCourant)) return false;
+        plateau.placer(new Coup(position,symbole));
+        mettreAJourStatutApresCoup();
+        if(joueurCourant.equals(Symbole.X)) joueurCourant = Symbole.O;
+        else joueurCourant = Symbole.X;
+        return true;
     }
     public boolean isPartieEnCours() {
         if (statut != StatutPartie.EN_COURS) {
@@ -37,9 +44,13 @@ public final class Partie {
         return true;
     }
     private void mettreAJourStatutApresCoup() {
-        throw new MethodeNonImplementeeException("***** Vous n'avez pas encore implemente la methode : "
-                +Thread.currentThread().getStackTrace()[1].getMethodName()
-                +"() de la classe "+this.getClass().getName());
+        if (!plateau.ligneGagnante().isEmpty() && joueurCourant == Symbole.X){
+            statut = StatutPartie.X_GAGNE;
+        }else if (!plateau.ligneGagnante().isEmpty() && joueurCourant == Symbole.O){
+            statut = StatutPartie.O_GAGNE;
+        }else if (plateau.estPlein()) {
+            statut = StatutPartie.NULLE;
+        }
     }
 
     @Override

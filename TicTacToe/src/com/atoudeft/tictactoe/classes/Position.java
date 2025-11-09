@@ -14,4 +14,10 @@ public final class Position {
     public int getColonne() { return colonne; }
 
     @Override public String toString() { return "(" + ligne + "," + colonne + ")"; }
+
+    @Override
+    public boolean equals(Object o) {
+        Position p = (Position)o;
+        return (this.ligne==p.ligne&&this.colonne==p.colonne) ;
+    }
 }
