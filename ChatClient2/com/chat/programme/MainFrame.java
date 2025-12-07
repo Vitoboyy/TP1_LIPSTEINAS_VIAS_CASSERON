@@ -41,7 +41,7 @@ public class MainFrame extends JFrame implements Runnable, Observateur {
 
     private void configurerFenetrePrincipale() {
         //Configuration de la fenêtre
-        this.setSize(1400,900);
+        this.setSize(1400, 900);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     }
 
@@ -51,7 +51,7 @@ public class MainFrame extends JFrame implements Runnable, Observateur {
         client.ajouterObservateur(this);
         panneauPrincipal = new PanneauPrincipal(client);
         ecouteurMenuPrincipal = new EcouteurMenuPrincipal(client, this);
-        gestionnaireEvenement = new GestionnaireEvenementClient2(client,panneauPrincipal);
+        gestionnaireEvenement = new GestionnaireEvenementClient2(client, panneauPrincipal);
 
         //Menus :
         mDemarrer = new JMenu("Démarrer");
@@ -88,18 +88,27 @@ public class MainFrame extends JFrame implements Runnable, Observateur {
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater( new MainFrame() );
+        EventQueue.invokeLater(new MainFrame());
     }
 
     @Override
     public void seMettreAJour(Observable observable) {
         if (observable instanceof Client) {
-            Client client = (Client)observable;
+            Client client = (Client) observable;
+
             if (!client.isConnecte()) {
+                miConnecter.setEnabled(true);
+                miDeconnecter.setEnabled(false);
                 this.setTitle(TITRE);
                 this.panneauPrincipal.setVisible(false);
                 panneauPrincipal.vider();
+
+
+            }else if(client.isConnecte()) {
+                miConnecter.setEnabled(false);
+                miDeconnecter.setEnabled(true);
             }
         }
+
     }
 }

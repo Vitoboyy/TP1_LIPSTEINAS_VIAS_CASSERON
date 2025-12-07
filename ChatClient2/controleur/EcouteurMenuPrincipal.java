@@ -58,11 +58,12 @@ public class EcouteurMenuPrincipal implements ActionListener {
                             clientChat.setAdrServeur(pcs.getAdresseServeur());
                             try {
                                 int port = Integer.parseInt(pcs.getPortServeur());
+                                if(port<1 || port>65735) throw new NumberFormatException();
                                 clientChat.setPortServeur(port);
                                 recommencer=false;
                             } catch (NumberFormatException exp) {
                                 JOptionPane.showMessageDialog(fenetre, "Le port ("
-                                                                + pcs.getPortServeur() + ") doit être entier");
+                                                                + pcs.getPortServeur() + ") doit être entier ou compris entre 1 et 65735");
                             }
                         }
                         else
