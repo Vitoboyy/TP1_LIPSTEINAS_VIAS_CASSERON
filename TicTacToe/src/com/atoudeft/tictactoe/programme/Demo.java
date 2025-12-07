@@ -21,6 +21,7 @@ public class Demo {
             System.out.print("Entrez le coup dans le format : symbole ligne colonne comme par exemple X 0 2 : ");
             saisie = clavier.nextLine();
             t = saisie.split(" ");
+
             if (t.length<3) {
                 System.out.println("Mauvaise saisie");
                 continue;
