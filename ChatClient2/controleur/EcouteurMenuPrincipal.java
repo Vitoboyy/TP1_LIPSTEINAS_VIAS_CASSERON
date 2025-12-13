@@ -63,7 +63,7 @@ public class EcouteurMenuPrincipal implements ActionListener {
                                 recommencer=false;
                             } catch (NumberFormatException exp) {
                                 JOptionPane.showMessageDialog(fenetre, "Le port ("
-                                                                + pcs.getPortServeur() + ") doit être entier ou compris entre 1 et 65735");
+                                                                + pcs.getPortServeur() + ") doit être entier et compris entre 1 et 65735");
                             }
                         }
                         else

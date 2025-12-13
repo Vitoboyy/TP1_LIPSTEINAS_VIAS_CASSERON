@@ -19,8 +19,12 @@ public class PanneauChatPrive extends PanneauChat {
         bAccepterOuInviter.setActionCommand("ACCEPTER");
         bRefuser.setActionCommand("REFUSER");
 
-        //à compléter
+        JPanel pNord = new JPanel();
+        pNord.add(bAccepterOuInviter);
+        pNord.add(bRefuser);
 
+        this.add(pNord, java.awt.BorderLayout.NORTH);
+        bRefuser.setVisible(false);
     }
     @Override
     public void setEcouteur(ActionListener ecouteur) {
@@ -29,10 +33,12 @@ public class PanneauChatPrive extends PanneauChat {
         bRefuser.addActionListener(ecouteur);
     }
     public void invitationAJouerRecue() {
-        //à compléter
+        bAccepterOuInviter.setText("Accepter");
+        bRefuser.setVisible(true);
     }
     public void invitationAJouerAnnulee() {
-        //à compléter
+        bAccepterOuInviter.setText("Inviter TTT");
+        bRefuser.setVisible(false);
     }
 
     public void setFenetreJeu(FenetreTicTacToe fenetreTicTacToe) {
