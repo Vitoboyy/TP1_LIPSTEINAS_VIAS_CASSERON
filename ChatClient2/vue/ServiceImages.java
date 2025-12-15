@@ -2,6 +2,8 @@ package vue;
 
 
 import javax.swing.*;
+import java.net.URL;
+
 /**
  *
  * @author Abdelmoumène Toudeft (Abdelmoumene.Toudeft@etsmtl.ca)
@@ -31,7 +33,12 @@ public class ServiceImages {
 		System.out.println("Nom fichier de l'image : "+nomFichier);
 		if (nomFichier==null)
 			return null;
-		return new ImageIcon("imgs/"+nomFichier);
+        URL url = ServiceImages.class.getResource("/imgs/" + nomFichier);
+        if (url == null) {
+            System.err.println("Image introuvable : /imgs/" + nomFichier);
+            return null;
+        }
+		return new ImageIcon(url);
 	}
 	public static ImageIcon getImage(String nomFichier) {
 		return new ImageIcon("imgs/"+nomFichier);

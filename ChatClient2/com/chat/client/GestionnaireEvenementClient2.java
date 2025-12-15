@@ -5,11 +5,13 @@ import com.chat.commun.evenement.GestionnaireEvenement;
 import com.chat.commun.net.Connexion;
 import com.chat.tictactoe.EtatPartieTicTacToe;
 import com.chat.programme.MainFrame;
+import controleur.EcouteurTicTacToe;
 import vue.FenetreTicTacToe;
 import vue.PanneauPrincipal;
 import vue.PanneauTicTacToe;
 
 import javax.swing.*;
+import java.awt.event.ActionListener;
 
 public class GestionnaireEvenementClient2 implements GestionnaireEvenement {
     private ClientChat client;
@@ -148,11 +150,14 @@ public class GestionnaireEvenementClient2 implements GestionnaireEvenement {
                     str = arg.substring(arg.indexOf(" ")+1);
                     arg = arg.substring(0,arg.indexOf(" "));
                     client.nouvellePartie();
-                    System.out.println("Partie d'échecs démarrée avec "+arg+". Votre couleur est : "+str);
+                    System.out.println("Partie de Tic-Tac-Toe démarrée avec "+arg+". Votre signe est : "+str);
                     System.out.println(client.getEtatPartieTicTacToe());
                     PanneauTicTacToe panneauTicTacToe = new PanneauTicTacToe(client.getEtatPartieTicTacToe());
-                    //à compléter
-
+                    EcouteurTicTacToe ecouteurTicTacToe = new EcouteurTicTacToe(client,str);
+                    panneauTicTacToe.setEcouteurTicTacToe(ecouteurTicTacToe);
+                    String titre = "Vous (" + str + ") contre " + arg;
+                    fenetreTicTacToe = new FenetreTicTacToe(panneauTicTacToe, titre);
+                    fenetreTicTacToe.setVisible(true);
                     panneauPrincipal.setFenetreTicTacToe(arg,fenetreTicTacToe);
                     break;
                 case "INVALID":
